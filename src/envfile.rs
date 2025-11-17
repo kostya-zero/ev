@@ -6,6 +6,18 @@ use thiserror::Error;
 pub enum EnvfileError {
     #[error("Key '{0}' not found.")]
     KeyNotFound(String),
+
+    #[error("Error on line {0}: {1}.")]
+    BadFormat(usize, EnvfileParseError),
+}
+
+#[derive(Debug, Error)]
+pub enum EnvfileParseError {
+    #[error("key with name '{0}' defined twice")]
+    AlreadyDefined(String),
+
+    #[error("syntax error (not a key)")]
+    NotKey,
 }
 
 #[derive(Debug, Default)]
@@ -18,6 +30,35 @@ impl Envfile {
         Self {
             variables: IndexMap::new(),
         }
+    }
+
+    pub fn from_string(content: String) -> Result<Envfile, EnvfileError> {
+        let lines = content.lines();
+        let mut vars: IndexMap<String, String> = IndexMap::new();
+        for (id, line) in lines.enumerate() {
+            // Skip comments
+            if line.starts_with("#") {
+                continue;
+            }
+
+            // Line should have at least one '=' symbol
+            if !line.contains("=") {
+                return Err(EnvfileError::BadFormat(id + 1, EnvfileParseError::NotKey));
+            }
+
+            let splitted = line.split_once("=").unwrap();
+            let key = splitted.0.to_string();
+            let value = splitted.1.to_string();
+            if vars.contains_key(&key) {
+                return Err(EnvfileError::BadFormat(
+                    id + 1,
+                    EnvfileParseError::AlreadyDefined(key),
+                ));
+            }
+            vars.insert(key, value).unwrap();
+        }
+
+        Ok(Self { variables: vars })
     }
 
     pub fn set(&mut self, key: &str, value: &str) -> Result<()> {
