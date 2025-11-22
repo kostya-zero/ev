@@ -8,6 +8,7 @@ mod cli;
 mod commands;
 mod envfile;
 mod loader;
+mod terminal;
 
 fn main() {
     let cli = Cli::parse();
@@ -18,7 +19,7 @@ fn main() {
     }
 
     let result = match cli.command.unwrap() {
-        cli::Command::Set => todo!(),
+        cli::Command::Set(args) => root::handle_set(args),
         cli::Command::Remove => todo!(),
         cli::Command::List => root::handle_list(),
     };

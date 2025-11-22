@@ -1,4 +1,4 @@
-use clap::{Parser, Subcommand};
+use clap::{Args, Parser, Subcommand};
 
 // An environment manager you'll envy
 #[derive(Parser)]
@@ -17,11 +17,20 @@ pub struct Cli {
 #[derive(Subcommand)]
 pub enum Command {
     /// Set a value for variable. Can overwrite existing one.
-    Set,
+    Set(SetArgs),
 
     /// Remove a variable.
     Remove,
 
     /// List all available variables.
     List,
+}
+
+#[derive(Args)]
+pub struct SetArgs {
+    /// The key name to insert/update.
+    pub key: Option<String>,
+
+    /// The value to set.
+    pub values: Option<String>,
 }

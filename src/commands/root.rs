@@ -1,6 +1,31 @@
-use anyhow::Result;
+use std::fs;
 
-use crate::loader;
+use anyhow::Result;
+use anyhow::anyhow;
+
+use crate::{cli::SetArgs, loader};
+
+pub fn handle_set(args: SetArgs) -> Result<()> {
+    if args.key.is_none() {
+        return Err(anyhow!("No key provided."));
+    }
+    let key = args.key.unwrap();
+
+    if args.values.is_none() {
+        return Err(anyhow!("No value provided."));
+    }
+    let value = args.values.unwrap();
+    let mut envfile = loader::load_env()?;
+
+    if let Err(e) = envfile.set(&key, &value) {
+        return Err(anyhow!(e));
+    }
+
+    let content = envfile.dump();
+    fs::write(".env", content).map_err(|_| anyhow!("An error in file system occurred."))?;
+
+    Ok(())
+}
 
 pub fn handle_list() -> Result<()> {
     let envfile = loader::load_env()?;

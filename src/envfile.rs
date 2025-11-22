@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use anyhow::Result;
 use indexmap::IndexMap;
 use thiserror::Error;
@@ -35,9 +37,11 @@ impl Envfile {
     pub fn from_string(content: String) -> Result<Envfile, EnvfileError> {
         let lines = content.lines();
         let mut vars: IndexMap<String, String> = IndexMap::new();
-        for (id, line) in lines.enumerate() {
-            // Skip comments
-            if line.starts_with("#") {
+        for (id, raw_line) in lines.enumerate() {
+            let line = raw_line.trim();
+
+            // Skip if empty or a comment
+            if line.is_empty() || line.starts_with("#") {
                 continue;
             }
 
@@ -65,9 +69,7 @@ impl Envfile {
         if self.variables.contains_key(key) {
             *self.variables.get_mut(key).unwrap() = value.to_string();
         } else {
-            self.variables
-                .insert(key.to_string(), value.to_string())
-                .unwrap();
+            self.variables.insert(key.to_string(), value.to_string());
         }
         Ok(())
     }
@@ -86,6 +88,20 @@ impl Envfile {
 
     pub fn get_all(&self) -> &IndexMap<String, String> {
         &self.variables
+    }
+
+    pub fn dump(&self) -> String {
+        let mut result = String::new();
+
+        if self.variables.is_empty() {
+            return result;
+        }
+
+        for (k, v) in self.variables.iter() {
+            result.push_str(format!("{k}={v}\n").as_str());
+        }
+
+        result
     }
 
     pub fn remove(&mut self, key: &str) -> Result<()> {
