@@ -2,13 +2,10 @@ use std::process::exit;
 
 use clap::Parser;
 
-use crate::{cli::Cli, commands::root};
-
-mod cli;
-mod commands;
-mod envfile;
-mod loader;
-mod terminal;
+use envy::{
+    cli::{self, Cli},
+    commands::root,
+};
 
 fn main() {
     let cli = Cli::parse();
@@ -20,8 +17,8 @@ fn main() {
 
     let result = match cli.command.unwrap() {
         cli::Command::Set(args) => root::handle_set(args),
-        cli::Command::Remove => todo!(),
         cli::Command::List => root::handle_list(),
+        cli::Command::Remove => todo!(),
     };
 
     if let Err(e) = result {

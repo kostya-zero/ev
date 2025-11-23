@@ -42,3 +42,7 @@ pub fn handle_list() -> Result<()> {
 
     Ok(())
 }
+
+pub fn handle_remove() -> Result<()> {
+    Ok(())
+}
