@@ -1,36 +1,74 @@
+use std::env;
 use std::fs;
+use std::path::Path;
 
 use anyhow::Result;
 use anyhow::anyhow;
 use anyhow::bail;
+use colored::Colorize;
 
 use crate::cli::RemoveArgs;
+use crate::terminal::print_done;
 use crate::{cli::SetArgs, loader};
+
+pub fn handle_new() -> Result<()> {
+    let cwd = env::current_dir().map_err(|e| anyhow!("failed to get current directory: {}", e))?;
+
+    let env_path = cwd.join(".env");
+    let env_example_path = cwd.join(".env.example");
+
+    if env_path.exists() {
+        bail!("environment file already exists");
+    }
+
+    let content = load_template_content(&env_example_path)?;
+    write_env_file(&env_path, &content)?;
+
+    if env_example_path.exists() {
+        print_done("Generated .env file from .env.example");
+    } else {
+        print_done("Created .env file.");
+    }
+
+    Ok(())
+}
+
+fn load_template_content(example_path: &Path) -> Result<String> {
+    if example_path.exists() {
+        fs::read_to_string(example_path).map_err(|e| anyhow!("failed to read .env.example: {e}"))
+    } else {
+        Ok(String::new())
+    }
+}
+
+fn write_env_file(env_path: &Path, content: &str) -> Result<()> {
+    fs::write(env_path, content).map_err(|e| anyhow!("failed to write .env file: {e}"))
+}
 
 pub fn handle_set(args: SetArgs) -> Result<()> {
     if args.key.is_none() {
-        return Err(anyhow!("No key provided."));
+        bail!("no key provided")
     }
     let key = args.key.unwrap();
 
     if args.values.is_none() {
-        return Err(anyhow!("No value provided."));
+        bail!("no value provided")
     }
     let value = args.values.unwrap();
-    let mut envfile = loader::load_env()?;
+    let mut envfile = loader::load_env(".env")?;
 
     if let Err(e) = envfile.set(&key, &value) {
         return Err(anyhow!(e));
     }
 
     let content = envfile.dump();
-    fs::write(".env", content).map_err(|_| anyhow!("An error in file system occurred."))?;
+    fs::write(".env", content).map_err(|_| anyhow!("a file system error occurred"))?;
 
     Ok(())
 }
 
 pub fn handle_list() -> Result<()> {
-    let envfile = loader::load_env()?;
+    let envfile = loader::load_env(".env")?;
 
     if envfile.is_empty() {
         println!("No keys in env file.");
@@ -39,28 +77,22 @@ pub fn handle_list() -> Result<()> {
 
     let keys = envfile.get_all();
     for (k, v) in keys.iter() {
-        println!("{k}: {v}");
+        println!("{}: {}", k.bold(), v.dimmed());
     }
 
     Ok(())
 }
 
 pub fn handle_remove(args: RemoveArgs) -> Result<()> {
-    let mut envfile = loader::load_env()?;
-
-    if envfile.is_empty() {
-        println!("No keys in env file.");
-        return Ok(());
-    }
-
     if args.name.is_none() {
         bail!("No key name provided.");
     }
 
+    let mut envfile = loader::load_env(".env")?;
     envfile.remove(&args.name.unwrap())?;
 
     let content = envfile.dump();
-    fs::write(".env", content).map_err(|_| anyhow!("An error in file system occurred."))?;
+    fs::write(".env", content).map_err(|_| anyhow!("a file system error occurred"))?;
 
     Ok(())
 }

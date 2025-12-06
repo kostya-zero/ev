@@ -16,6 +16,9 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Command {
+    /// Generate new environment file.
+    New,
+
     /// Set a value for variable. Can overwrite existing one.
     Set(SetArgs),
 

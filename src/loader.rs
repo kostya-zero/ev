@@ -16,10 +16,10 @@ pub enum LoaderError {
     UnexpectedError(String),
 }
 
-pub fn load_env() -> Result<Envfile> {
+pub fn load_env(path: &str) -> Result<Envfile> {
     let mut cwd = env::current_dir()
         .map_err(|_| LoaderError::UnexpectedError("cannot get current directory".to_string()))?;
-    cwd = cwd.join(".env");
+    cwd = cwd.join(path);
 
     if !cwd.exists() {
         return Err(LoaderError::FileNotFound.into());
