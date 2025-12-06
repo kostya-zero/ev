@@ -27,7 +27,7 @@ pub fn handle_new() -> Result<()> {
     if env_example_path.exists() {
         print_done("Generated .env file from .env.example");
     } else {
-        print_done("Created .env file.");
+        print_done("Created empty .env file.");
     }
 
     Ok(())
