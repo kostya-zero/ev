@@ -22,7 +22,7 @@ pub fn handle_new() -> Result<()> {
     }
 
     let content = load_template_content(&env_example_path)?;
-    write_env_file(&env_path, &content)?;
+    fs::write(env_path, content).map_err(|e| anyhow!("failed to write .env file: {e}"))?;
 
     if env_example_path.exists() {
         print_done("Generated .env file from .env.example");
@@ -41,10 +41,6 @@ fn load_template_content(example_path: &Path) -> Result<String> {
     }
 }
 
-fn write_env_file(env_path: &Path, content: &str) -> Result<()> {
-    fs::write(env_path, content).map_err(|e| anyhow!("failed to write .env file: {e}"))
-}
-
 pub fn handle_set(args: SetArgs) -> Result<()> {
     if args.key.is_none() {
         bail!("no key provided")
@@ -61,9 +57,7 @@ pub fn handle_set(args: SetArgs) -> Result<()> {
         return Err(anyhow!(e));
     }
 
-    let content = envfile.dump();
-    fs::write(".env", content).map_err(|_| anyhow!("a file system error occurred"))?;
-
+    loader::save_env(".env", &envfile)?;
     Ok(())
 }
 
@@ -91,8 +85,6 @@ pub fn handle_remove(args: RemoveArgs) -> Result<()> {
     let mut envfile = loader::load_env(".env")?;
     envfile.remove(&args.name.unwrap())?;
 
-    let content = envfile.dump();
-    fs::write(".env", content).map_err(|_| anyhow!("a file system error occurred"))?;
-
+    loader::save_env(".env", &envfile)?;
     Ok(())
 }

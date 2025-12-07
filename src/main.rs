@@ -24,7 +24,7 @@ fn main() {
     };
 
     if let Err(e) = result {
-        eprintln!("{}: {e}", "Error".red());
+        eprintln!("{}: {e}", "error".bright_red().bold());
         exit(1)
     }
 }

@@ -1,31 +1,39 @@
 use anyhow::Result;
-use std::{env, fs};
+use std::{env, fs, path::Path};
 use thiserror::Error;
 
 use crate::envfile::Envfile;
 
 #[derive(Error, Debug)]
 pub enum LoaderError {
-    #[error("No env file found.")]
+    #[error("no file found")]
     FileNotFound,
 
-    #[error("Failed to read filke contents.")]
+    #[error("failed to read the file")]
     ReadFailed,
 
-    #[error("Unexpected error occurred: {0}")]
+    #[error("failed to write to file")]
+    WriteFailed,
+
+    #[error("unexpected error occurred: {0}")]
     UnexpectedError(String),
 }
 
 pub fn load_env(path: &str) -> Result<Envfile> {
-    let mut cwd = env::current_dir()
-        .map_err(|_| LoaderError::UnexpectedError("cannot get current directory".to_string()))?;
-    cwd = cwd.join(path);
+    let path = Path::new(&path);
 
-    if !cwd.exists() {
+    if !path.exists() {
         return Err(LoaderError::FileNotFound.into());
     }
 
-    let content = fs::read_to_string(cwd).map_err(|_| LoaderError::ReadFailed)?;
+    let content = fs::read_to_string(path).map_err(|_| LoaderError::ReadFailed)?;
     let envfile = Envfile::from_string(content)?;
     Ok(envfile)
+}
+
+pub fn save_env(path: &str, envfile: &Envfile) -> Result<()> {
+    let path = Path::new(&path);
+    let dump = envfile.dump();
+    fs::write(path, dump).map_err(|_| LoaderError::WriteFailed)?;
+    Ok(())
 }

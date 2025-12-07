@@ -4,10 +4,10 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum EnvfileError {
-    #[error("Key '{0}' not found.")]
+    #[error("key '{0}' not found")]
     KeyNotFound(String),
 
-    #[error("Bad format on line {0}: {1}.")]
+    #[error("bad format on line {0}: {1}")]
     BadFormat(usize, EnvfileParseError),
 }
 
