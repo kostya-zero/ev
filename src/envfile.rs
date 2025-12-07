@@ -13,7 +13,7 @@ pub enum EnvfileError {
 
 #[derive(Debug, Error)]
 pub enum EnvfileParseError {
-    #[error("key with name '{0}' defined twice")]
+    #[error("key with name '{0}' is already defined")]
     AlreadyDefined(String),
 
     #[error("syntax error (not a key)")]

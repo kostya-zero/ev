@@ -12,7 +12,10 @@ fn main() {
     let cli = Cli::parse();
 
     if cli.command.is_none() {
-        let _ = root::handle_list();
+        if let Err(e) = root::handle_list() {
+            eprintln!("{}: {e}", "error".bright_red().bold());
+            exit(1);
+        }
         exit(0);
     }
 
