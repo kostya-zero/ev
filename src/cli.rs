@@ -1,6 +1,5 @@
 use clap::{Args, Parser, Subcommand};
 
-/// An environment manager you'll envy
 #[derive(Parser)]
 #[command(
     about = env!("CARGO_PKG_DESCRIPTION"),
