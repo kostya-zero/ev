@@ -3,7 +3,7 @@ use std::process::exit;
 use clap::Parser;
 
 use colored::Colorize;
-use envy::{
+use ev_manager::{
     cli::{self, Cli},
     commands::root,
 };

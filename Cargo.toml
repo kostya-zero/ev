@@ -1,14 +1,18 @@
 [package]
-name = "envy"
-description = "The environment manager you'll envy."
+name = "ev-manager"
+description = "Control your environment."
 authors = ["Konstantin Zhigaylo <zero@kosyazero.com>"]
 keywords = ["cli", "environment", "env"]
 readme = "README.md"
 license = "MIT"
-homepage = "https://github.com/kostya-zero/envy"
-repository = "https://github.com/kostya-zero/envy"
+homepage = "https://github.com/kostya-zero/ev"
+repository = "https://github.com/kostya-zero/ev"
 version = "0.1.0"
 edition = "2024"
+
+[[bin]]
+path = "src/main.rs"
+name = "ev"
 
 [dependencies]
 anyhow = "1.0.100"
